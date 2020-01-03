@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -11,13 +10,13 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import {ScrollView, TouchableHighlight} from 'react-native-gesture-handler';
+import {ScrollView} from 'react-native-gesture-handler';
 
 const App = () => {
   const [text, setText] = useState('');
   const [onchangeHeader, setOnchangeHeader] = useState(false);
-  const [value, setValue] = useState(new Animated.Value(0)); // Initial value for opacity: 0
-  const [fadeAnim, setFadeAnim] = useState(new Animated.Value(0)); // Initial value for opacity: 0
+  const [header] = useState(new Animated.Value(1)); // Initial value for opacity: 0
+  const [searchBAr] = useState(new Animated.Value(0)); // Initial value for opacity: 0
   const [nilaiYangDiAnimasikan] = useState(new Animated.Value(0));
 
   const animate = easing => {
@@ -41,114 +40,93 @@ const App = () => {
     outputRange: [10, 300],
   });
 
-  const opacity = nilaiYangDiAnimasikan.interpolate({
-    inputRange: [0, 10],
-    outputRange: [0, 1],
-  });
-  // React.useEffect(() => {
-  //   Animated.timing(value, {
-  //     toValue: 1,
-  //     duration: 1000,
-  //   }).start(() => setValue(new Animated.value(0)));
-  // }[value]);
-
-  // React.useEffect(() => {
-  //   Animated.timing(fadeAnim, {
-  //     toValue: 1,
-  //     duration: 5000,
-  //   }).start(() => setFadeAnim(new Animated.value(0)));
-  // }, []);
-
-  const coba = () => {
+  const _header = easing => {
+    // fadeAnim.setValue(0);
     setOnchangeHeader(!onchangeHeader);
-    if (!onchangeHeader) {
-      fadeIn();
-    } else {
-      console.log('hello');
-      fadeOut();
-    }
-  };
-
-  const fadeIn = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
+    Animated.timing(header, {
+      toValue: onchangeHeader ? 1 : 0,
       duration: 500,
-      easing: Easing.in,
+      easing,
+    }).start();
+    Animated.timing(searchBAr, {
+      toValue: onchangeHeader ? 0 : 1,
+      duration: 500,
+      easing,
     }).start();
   };
 
-  const fadeOut = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 500,
-      easing: Easing.out,
-    }).start();
-  };
-
-  // const animateIcon = () => {
-  //   setOnchangeHeader(!onchangeHeader);
-  //   Animated.spring(value, {
-  //     toValue: 1,
-  //     friction: 3,
-  //     stretch: 100,
-  //   }).start(setValue(0.75));
-  // };
-
-  let animatedValue = fadeAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [5000, 0],
+  const moveSearchBar = searchBAr.interpolate({
+    // inputRange: [0, 0, 0, 0, 0.8, 0.9, 1],
+    // outputRange: [-1600, -1500, -220, -150, -90, -40, 0],
+    inputRange: [0, 0, 0, 0.5, 1],
+    outputRange: [-500, -400, -300, -200, 0],
   });
-  console.log('fadeAnim', fadeAnim);
+
   return (
     <View style={styles.container}>
-      {!onchangeHeader ? (
-        // <Animated.View style={[styles.header, {transform: [{scale: value}]}]}>
-        <View style={[styles.header]}>
-          <TouchableOpacity onPress={() => coba()} style={styles.left}>
+      <View>
+        <Animated.View
+          style={[
+            styles.header,
+            {transform: [{scale: header}], opacity: header},
+          ]}>
+          {/* <Animated.View style={[styles.header]}> */}
+          <TouchableOpacity onPress={() => _header()} style={styles.left}>
             <Icon name="bars" size={30} color="grey" />
           </TouchableOpacity>
           <View style={styles.center}>
             <Text style={{color: 'grey', fontSize: 20}}>Application</Text>
           </View>
           <TouchableOpacity
-            onPress={() => coba()}
+            onPress={() => _header(Easing.inOut(Easing.quad))}
             style={[styles.right, {backgroundColor: 'white'}]}>
             <Icon name="search" size={30} color="grey" />
           </TouchableOpacity>
-        </View>
-      ) : (
-        // <Animated.View style={[styles.header]}>
+        </Animated.View>
+        {/* ///////////////////////////////////////////////////////////////////////// */}
         <Animated.View
-          style={[styles.header, {opacity: fadeAnim, left: animatedValue}]}>
-          <TouchableOpacity style={styles.left} onPress={() => coba()}>
+          style={[
+            styles.header,
+            {position: 'absolute', left: moveSearchBar, opacity: searchBAr},
+          ]}>
+          {/* <Animated.View
+          style={[styles.header, {position: 'absolute', opacity: 0.2}]}> */}
+          <TouchableOpacity
+            style={styles.left}
+            onPress={() => _header(Easing.inOut(Easing.quad))}>
             <Icon name="arrow-left" size={30} color="grey" />
           </TouchableOpacity>
           <View style={styles.center}>
-            <TextInput
-              style={{
-                color: 'grey',
-                padding: -20,
-                fontSize: 20,
-              }}
-              autoFocus
-              placeholder="Search something..."
-              onChangeText={tulisan => setText(tulisan)}
-              value={text}
-            />
+            {onchangeHeader && (
+              <TextInput
+                style={{
+                  color: 'grey',
+                  padding: -20,
+                  fontSize: 20,
+                }}
+                autoFocus
+                placeholder="Search something..."
+                onChangeText={tulisan => setText(tulisan)}
+                value={text}
+              />
+            )}
           </View>
           <TouchableOpacity
-            onPress={() => coba()}
+            onPress={() => _header(Easing.inOut(Easing.quad))}
             style={[styles.right, {backgroundColor: 'white'}]}>
             <Icon name="microphone" size={30} color="grey" />
           </TouchableOpacity>
         </Animated.View>
-      )}
-      <Animated.View style={[styles.block, {marginLeft, opacity}]} />
+      </View>
+      {/* <Animated.View style={[styles.block, {marginLeft, opacity}]} /> */}
       <ScrollView styles={{marginTop: 30}}>
-        <Text style={{textAlign: 'center'}}>Scroll up for more animations</Text>
+        <Button
+          easing="header"
+          onPress={() => _header(Easing.inOut(Easing.quad))}
+        />
         <Button easing="Bounce" onPress={() => animate(Easing.bounce)} />
         <Button easing="Cubic" onPress={() => animate(Easing.cubic)} />
-        <Button easing="Back" onPress={() => animate(Easing.back(2))} />
+        <Button easing="Back" onPress={() => animate(Easing.back(1))} />
         <Button easing="Elastic" onPress={() => animate(Easing.elastic(2))} />
         <Button easing="Ease" onPress={() => animate(Easing.ease)} />
         <Button
